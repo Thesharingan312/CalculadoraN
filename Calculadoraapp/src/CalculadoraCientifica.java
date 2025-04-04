@@ -1,14 +1,16 @@
 /**
  * Clase de la interfaz gráfica de la calculadora científica
  */
-class CalculadoraCientifica extends javax.swing.JFrame {
+public class CalculadoraCientifica extends javax.swing.JFrame {
     private final OperacionesCientificas operaciones;
     private double valorActual = 0;
     private double memoria = 0;
     private String operacionPendiente = "";
     private boolean iniciarNuevoNumero = true;
     private boolean usarRadianes = true;
-    
+    // Flag para tema: true = tema claro, false = tema oscuro
+    private boolean temaClaro = true;
+
     // Componentes de la interfaz gráfica
     private javax.swing.JTextField pantalla;
     private javax.swing.JPanel panelBotones;
@@ -17,38 +19,36 @@ class CalculadoraCientifica extends javax.swing.JFrame {
     private javax.swing.JRadioButton radioGrados;
     private javax.swing.JRadioButton radioRadianes;
     private javax.swing.JLabel labelMemoria;
-    
+    // Botón para alternar el tema
+    private javax.swing.JButton btnCambiarTema;
+
     /**
- * Constructor de la calculadora científica
- */
-public CalculadoraCientifica() {
-    operaciones = new OperacionesCientificas();
-    inicializarComponentes();
-    setTitle("Calculadora Científica");
-    setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-    
-    // Cargar y establecer el icono
-    try {
-        // Método 1: Cargar desde archivo
-        java.io.File iconFile = new java.io.File("resources/calculadora_icon.png");
-        if (iconFile.exists()) {
-            setIconImage(javax.imageio.ImageIO.read(iconFile));
-        } else {
-            System.out.println("Archivo de icono no encontrado");
+     * Constructor de la calculadora científica
+     */
+    public CalculadoraCientifica() {
+        operaciones = new OperacionesCientificas();
+        inicializarComponentes();
+        setTitle("Calculadora Científica");
+        setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        
+        // Cargar y establecer el icono
+        try {
+            java.io.File iconFile = new java.io.File("resources/calculadora_icon.png");
+            if (iconFile.exists()) {
+                setIconImage(javax.imageio.ImageIO.read(iconFile));
+            } else {
+                System.out.println("Archivo de icono no encontrado");
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Error al cargar el icono: " + e.getMessage());
         }
         
-        // Método 2: Cargar desde recursos (alternativa)
-        // java.net.URL iconURL = getClass().getResource("/resources/calculadora_icon.png");
-        // if (iconURL != null) {
-        //     setIconImage(javax.imageio.ImageIO.read(iconURL));
-        // }
-    } catch (java.io.IOException e) {
-        System.err.println("Error al cargar el icono: " + e.getMessage());
+        // Aplicar tema por defecto (claro)
+        aplicarTemaClaro();
+        
+        pack();
+        setLocationRelativeTo(null);
     }
-    
-    pack();
-    setLocationRelativeTo(null);
-}
     
     /**
      * Inicializa todos los componentes de la interfaz gráfica
@@ -130,6 +130,11 @@ public CalculadoraCientifica() {
         labelMemoria = new javax.swing.JLabel("Memoria: 0");
         panelEstado.add(labelMemoria);
         
+        // Botón para cambiar el tema
+        btnCambiarTema = new javax.swing.JButton("Tema Oscuro");
+        btnCambiarTema.addActionListener(e -> cambiarTema());
+        panelEstado.add(btnCambiarTema);
+        
         getContentPane().add(panelEstado, java.awt.BorderLayout.SOUTH);
     }
     
@@ -141,10 +146,7 @@ public CalculadoraCientifica() {
     private javax.swing.JButton crearBoton(String texto) {
         javax.swing.JButton boton = new javax.swing.JButton(texto);
         boton.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 14));
-        
-        // Añadir listener al botón
         boton.addActionListener(e -> procesarBoton(texto));
-        
         return boton;
     }
     
@@ -155,6 +157,99 @@ public CalculadoraCientifica() {
     private void cambiarModoAngulo(boolean usarRadianes) {
         this.usarRadianes = usarRadianes;
         operaciones.setModoAngulo(usarRadianes);
+    }
+    
+    /**
+     * Lógica para cambiar de tema al pulsar el botón
+     */
+    private void cambiarTema() {
+        if (temaClaro) {
+            aplicarTemaOscuro();
+            btnCambiarTema.setText("Tema Claro");
+        } else {
+            aplicarTemaClaro();
+            btnCambiarTema.setText("Tema Oscuro");
+        }
+        temaClaro = !temaClaro;
+        repaint();
+    }
+    
+    /**
+     * Aplica el tema claro a todos los componentes de la interfaz
+     */
+    private void aplicarTemaClaro() {
+        java.awt.Color fondoClaro = new java.awt.Color(255, 255, 255);
+        java.awt.Color textoOscuro = new java.awt.Color(0, 0, 0);
+        
+        getContentPane().setBackground(fondoClaro);
+        pantalla.setBackground(fondoClaro);
+        pantalla.setForeground(textoOscuro);
+        
+        panelBotones.setBackground(fondoClaro);
+        panelCientificos.setBackground(fondoClaro);
+        panelEstado.setBackground(fondoClaro);
+        
+        for (java.awt.Component comp : panelBotones.getComponents()) {
+            if (comp instanceof javax.swing.JButton) {
+                javax.swing.JButton boton = (javax.swing.JButton) comp;
+                boton.setBackground(fondoClaro);
+                boton.setForeground(textoOscuro);
+            }
+        }
+        
+        for (java.awt.Component comp : panelCientificos.getComponents()) {
+            if (comp instanceof javax.swing.JButton) {
+                javax.swing.JButton boton = (javax.swing.JButton) comp;
+                boton.setBackground(fondoClaro);
+                boton.setForeground(textoOscuro);
+            }
+        }
+        
+        radioGrados.setBackground(fondoClaro);
+        radioGrados.setForeground(textoOscuro);
+        radioRadianes.setBackground(fondoClaro);
+        radioRadianes.setForeground(textoOscuro);
+        labelMemoria.setBackground(fondoClaro);
+        labelMemoria.setForeground(textoOscuro);
+    }
+    
+    /**
+     * Aplica el tema oscuro a todos los componentes de la interfaz
+     */
+    private void aplicarTemaOscuro() {
+        java.awt.Color fondoOscuro = new java.awt.Color(45, 45, 45);
+        java.awt.Color textoClaro = new java.awt.Color(230, 230, 230);
+        
+        getContentPane().setBackground(fondoOscuro);
+        pantalla.setBackground(fondoOscuro);
+        pantalla.setForeground(textoClaro);
+        
+        panelBotones.setBackground(fondoOscuro);
+        panelCientificos.setBackground(fondoOscuro);
+        panelEstado.setBackground(fondoOscuro);
+        
+        for (java.awt.Component comp : panelBotones.getComponents()) {
+            if (comp instanceof javax.swing.JButton) {
+                javax.swing.JButton boton = (javax.swing.JButton) comp;
+                boton.setBackground(fondoOscuro);
+                boton.setForeground(textoClaro);
+            }
+        }
+        
+        for (java.awt.Component comp : panelCientificos.getComponents()) {
+            if (comp instanceof javax.swing.JButton) {
+                javax.swing.JButton boton = (javax.swing.JButton) comp;
+                boton.setBackground(fondoOscuro);
+                boton.setForeground(textoClaro);
+            }
+        }
+        
+        radioGrados.setBackground(fondoOscuro);
+        radioGrados.setForeground(textoClaro);
+        radioRadianes.setBackground(fondoOscuro);
+        radioRadianes.setForeground(textoClaro);
+        labelMemoria.setBackground(fondoOscuro);
+        labelMemoria.setForeground(textoClaro);
     }
     
     /**
@@ -273,7 +368,7 @@ public CalculadoraCientifica() {
         }
         
         pantalla.setText(formatearResultado(valor));
-        valorActual = valor;
+        this.valorActual = valor;
         iniciarNuevoNumero = true;
     }
     
@@ -380,4 +475,13 @@ public CalculadoraCientifica() {
         pantalla.setText(formatearResultado(memoria));
         iniciarNuevoNumero = true;
     }
+    
+    // /**
+    //  * Método main para ejecutar la aplicación
+    //  */
+    // public static void main(String[] args) {
+    //     java.awt.EventQueue.invokeLater(() -> {
+    //         new CalculadoraCientifica().setVisible(true);
+    //     });
+    // }
 }
