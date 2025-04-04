@@ -152,14 +152,32 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
     }
     
     /**
-     * Crea un botón con el texto especificado y añade el listener correspondiente
+     * Crea un botón con el texto especificado, añade el listener para procesar la acción y el efecto visual.
      * @param texto texto a mostrar en el botón
      * @return botón configurado
      */
     private javax.swing.JButton crearBoton(String texto) {
         javax.swing.JButton boton = new javax.swing.JButton(texto);
         boton.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 14));
+        // Listener principal para procesar la acción del botón
         boton.addActionListener(e -> procesarBoton(texto));
+        
+        // Listener adicional para el efecto "brillar en verde"
+        boton.addActionListener(e -> {
+            // Cambiar color a verde al pulsar
+            boton.setBackground(java.awt.Color.GREEN);
+            // Iniciar un Timer para restaurar el color original tras 200 ms
+            javax.swing.Timer timer = new javax.swing.Timer(200, evt -> {
+                if (temaClaro) {
+                    boton.setBackground(new java.awt.Color(255, 255, 255));
+                } else {
+                    boton.setBackground(new java.awt.Color(45, 45, 45));
+                }
+                ((javax.swing.Timer) evt.getSource()).stop();
+            });
+            timer.setRepeats(false);
+            timer.start();
+        });
         return boton;
     }
     
@@ -508,12 +526,12 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
         iniciarNuevoNumero = true;
     }
     
-    /**
-     * Método main para ejecutar la aplicación
-     */
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            new CalculadoraCientifica().setVisible(true);
-        });
-    }
+    // /**
+    //  * Método main para ejecutar la aplicación
+    //  */
+    // public static void main(String[] args) {
+    //     java.awt.EventQueue.invokeLater(() -> {
+    //         new CalculadoraCientifica().setVisible(true);
+    //     });
+    // }
 }
