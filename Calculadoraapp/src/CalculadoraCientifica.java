@@ -21,6 +21,12 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
     private javax.swing.JLabel labelMemoria;
     // Botón para alternar el tema
     private javax.swing.JButton btnCambiarTema;
+    
+    // Componentes para el historial
+    private javax.swing.JTextArea historial;
+    private javax.swing.JScrollPane scrollHistorial;
+    // Variable para ir armando la operación actual
+    private String operacionActual = "";
 
     /**
      * Constructor de la calculadora científica
@@ -136,6 +142,13 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
         panelEstado.add(btnCambiarTema);
         
         getContentPane().add(panelEstado, java.awt.BorderLayout.SOUTH);
+        
+        // Inicialización del historial y su scroll
+        historial = new javax.swing.JTextArea();
+        historial.setEditable(false);
+        scrollHistorial = new javax.swing.JScrollPane(historial);
+        scrollHistorial.setPreferredSize(new java.awt.Dimension(200, 0)); // ancho fijo para el historial
+        getContentPane().add(scrollHistorial, java.awt.BorderLayout.WEST);
     }
     
     /**
@@ -211,6 +224,9 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
         radioRadianes.setForeground(textoOscuro);
         labelMemoria.setBackground(fondoClaro);
         labelMemoria.setForeground(textoOscuro);
+        // Actualizamos también el historial
+        historial.setBackground(fondoClaro);
+        historial.setForeground(textoOscuro);
     }
     
     /**
@@ -250,59 +266,75 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
         radioRadianes.setForeground(textoClaro);
         labelMemoria.setBackground(fondoOscuro);
         labelMemoria.setForeground(textoClaro);
+        // Actualizamos también el historial
+        historial.setBackground(fondoOscuro);
+        historial.setForeground(textoClaro);
     }
     
     /**
-     * Procesa la acción del botón pulsado
+     * Procesa la acción del botón pulsado y actualiza el historial
      * @param texto texto del botón pulsado
      */
     private void procesarBoton(String texto) {
-        try {
-            switch (texto) {
-                case "0": case "1": case "2": case "3": case "4":
-                case "5": case "6": case "7": case "8": case "9":
-                case ".":
-                    procesarNumero(texto);
-                    break;
-                case "+": case "-": case "*": case "/":
-                    procesarOperacionBasica(texto);
-                    break;
-                case "=":
-                    calcularResultado();
-                    break;
-                case "C":
-                    limpiarTodo();
-                    break;
-                case "CE":
-                    limpiarEntrada();
-                    break;
-                case "M+":
-                    guardarEnMemoria();
-                    break;
-                case "MR":
-                    recuperarDeMemoria();
-                    break;
-                case "sin": case "cos": case "tan":
-                case "√": case "x²": case "log": case "ln": case "n!":
-                    procesarFuncionUnaria(texto);
-                    break;
-                case "xⁿ": case "mod":
-                    procesarOperacionBinaria(texto);
-                    break;
-                case "π":
-                    insertarConstante(Math.PI);
-                    break;
-                case "e":
-                    insertarConstante(Math.E);
-                    break;
-            }
-        } catch (ArithmeticException ex) {
-            pantalla.setText("Error: " + ex.getMessage());
-            iniciarNuevoNumero = true;
-        } catch (Exception ex) {
-            pantalla.setText("Error");
-            iniciarNuevoNumero = true;
+        // Para la mayoría de botones (números, operadores y funciones),
+        // se añade el texto a la operación actual.
+        if (!texto.equals("=") && !texto.equals("C") && !texto.equals("CE")
+                && !texto.equals("M+") && !texto.equals("MR")
+                && !texto.equals("Tema Oscuro") && !texto.equals("Tema Claro")) {
+            operacionActual += texto;
         }
+        
+        switch (texto) {
+            case "=":
+                // Añadimos el signo "=" y completamos la operación
+                operacionActual += "=";
+                calcularResultado();
+                operacionActual += pantalla.getText();
+                logOperacion(operacionActual);
+                operacionActual = "";
+                break;
+            case "C":
+                limpiarTodo();
+                operacionActual = "";
+                break;
+            case "CE":
+                limpiarEntrada();
+                break;
+            case "M+":
+                guardarEnMemoria();
+                break;
+            case "MR":
+                recuperarDeMemoria();
+                break;
+            case "sin": case "cos": case "tan":
+            case "√": case "x²": case "log": case "ln": case "n!":
+                procesarFuncionUnaria(texto);
+                break;
+            case "xⁿ": case "mod":
+                procesarOperacionBinaria(texto);
+                break;
+            case "+": case "-": case "*": case "/":
+                procesarOperacionBasica(texto);
+                break;
+            case "π":
+                insertarConstante(Math.PI);
+                break;
+            case "e":
+                insertarConstante(Math.E);
+                break;
+            default:
+                // Para dígitos y punto, se procesa el número
+                procesarNumero(texto);
+                break;
+        }
+    }
+    
+    /**
+     * Agrega una línea al historial con la operación completada
+     * @param mensaje operación completa (expresión y resultado)
+     */
+    private void logOperacion(String mensaje) {
+        historial.append(mensaje + "\n");
     }
     
     /**
@@ -314,12 +346,12 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
             pantalla.setText(digito);
             iniciarNuevoNumero = false;
         } else {
-            String valorActual = pantalla.getText();
+            String valorActualPantalla = pantalla.getText();
             // Evitar múltiples puntos decimales
-            if (digito.equals(".") && valorActual.contains(".")) {
+            if (digito.equals(".") && valorActualPantalla.contains(".")) {
                 return;
             }
-            pantalla.setText(valorActual + digito);
+            pantalla.setText(valorActualPantalla + digito);
         }
     }
     
@@ -476,12 +508,12 @@ public class CalculadoraCientifica extends javax.swing.JFrame {
         iniciarNuevoNumero = true;
     }
     
-    // /**
-    //  * Método main para ejecutar la aplicación
-    //  */
-    // public static void main(String[] args) {
-    //     java.awt.EventQueue.invokeLater(() -> {
-    //         new CalculadoraCientifica().setVisible(true);
-    //     });
-    // }
+    /**
+     * Método main para ejecutar la aplicación
+     */
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            new CalculadoraCientifica().setVisible(true);
+        });
+    }
 }
