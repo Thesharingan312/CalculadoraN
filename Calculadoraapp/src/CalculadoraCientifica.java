@@ -19,16 +19,36 @@ class CalculadoraCientifica extends javax.swing.JFrame {
     private javax.swing.JLabel labelMemoria;
     
     /**
-     * Constructor de la calculadora científica
-     */
-    public CalculadoraCientifica() {
-        operaciones = new OperacionesCientificas();
-        inicializarComponentes();
-        setTitle("Calculadora Científica");
-        setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        pack();
-        setLocationRelativeTo(null);
+ * Constructor de la calculadora científica
+ */
+public CalculadoraCientifica() {
+    operaciones = new OperacionesCientificas();
+    inicializarComponentes();
+    setTitle("Calculadora Científica");
+    setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+    
+    // Cargar y establecer el icono
+    try {
+        // Método 1: Cargar desde archivo
+        java.io.File iconFile = new java.io.File("resources/calculadora_icon.png");
+        if (iconFile.exists()) {
+            setIconImage(javax.imageio.ImageIO.read(iconFile));
+        } else {
+            System.out.println("Archivo de icono no encontrado");
+        }
+        
+        // Método 2: Cargar desde recursos (alternativa)
+        // java.net.URL iconURL = getClass().getResource("/resources/calculadora_icon.png");
+        // if (iconURL != null) {
+        //     setIconImage(javax.imageio.ImageIO.read(iconURL));
+        // }
+    } catch (java.io.IOException e) {
+        System.err.println("Error al cargar el icono: " + e.getMessage());
     }
+    
+    pack();
+    setLocationRelativeTo(null);
+}
     
     /**
      * Inicializa todos los componentes de la interfaz gráfica
